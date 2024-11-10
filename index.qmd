@@ -1,0 +1,214 @@
+---
+title: "OPTIPOLY"
+subtitle: "A module to solve box-constrained polynomial optimization problems"
+author: 
+    - name: "Mazen Alamir"
+      affiliation:  "CNRS, University of Grenoble Alpes"
+      homepage: "https://www.mazenalamir.fr"
+date: November, 2024
+keywords: ["Optimzation", "Multivariate Polynomial", "NLP", "Python"]
+---
+
+---
+`optipoly` is a non conventional optimizer dedicated to the optimization of multi-variate polynomial cost functions on admissible hypercubes. It leverages the extraordinarily fast computation of scalar polynomials by the `scipy.interpolation.interp1d` method in oder to derive a robust to local minima solution of the polynomial optimization problem. 
+
+Interested reader can refer to the citation provided [below](#citing) for a complete description and comparison with some existing solvers.
+
+Here, the main elements are explained briefly for an easy and quick use of the solver. 
+
+## Installation 
+```default
+pip install optipoly
+```
+
+## The optimization problem {#problem}
+Optipoly is a `python` module that solves boxed constrained optimization problem of the following form:
+
+$$
+\min_{x} P(x) \quad \text{$\vert\quad x\in [x_\text{min}, x_\text{max}]\subset \mathbb R^n$}
+$${#eq-problem}
+
+where 
+
+- $P(x)$ is a multivariate polynomial in the vector of arguments $x\in \mathbb R^n$. More precisely:
+
+$$
+P(x)=\sum_{i=1}^{n_c}c_i \phi_i(x)\quad \text{where}\quad \phi_i(x)=\prod_{j=1}^{n}x_j^{p_{ij}}
+$${#eq-defdeP}
+
+- $x_{min}\in \mathbb R^n$ is a vector of lower bounds on the components of $x$, 
+- $x_{max}\in \mathbb R^n$ is a vector of upper bounds on the components of $x$.
+
+::: {.callout-note}
+
+$n_c$ is the number of multi-variate monomials involved in the definition of the polynomial $P(x)$  and $c_i$ is the weight of the $i$-th monomial.
+    
+:::
+
+## Declaration of a polynomial {#declaration}
+
+::: {.callout-tip}
+# arguments of definition of a multivariate polynomial
+Based on the above definition of $P(x)$, it comes out that a polynomial is defined by two arguments: 
+
+1. **The matrix of powers** 
+    $$\texttt{powers}=\Bigl[p_{ij}\Bigr]_{(i,j)\in \{1,\dots,n_c\}\times \{1,\dots,n\}} \in \mathbb R^{n_c\times n}$$
+
+2. **The vector of coeficients** $$c\in \mathbb R^{n_c}$$
+:::
+
+Declaring a multivariate polynomial is done by creating an instance of the class `Pol`that is defined in the `optipoly` module. For instance, consider the following polynomial in three variables:
+
+$$
+P(x) = x_1x_3^2+2x_2^3
+$${#eq-examplePx}
+
+An instance of the class `Pol` that represent this polynomial can be created via the following script:
+
+```python 
+from optipoly import Pol
+
+# Define the matrix of powers and c.
+ 
+powers = [[1, 0, 2], [0,3,0]] 
+coefs = [1.0, 2.0]            
+
+# Create an instance of the class.
+
+pol = Pol(powers, coefs)      
+```
+
+## Evaluation of the polynomial {#evaluation}
+
+The the following script computes the values of the polynomial at the arguments defined by the lines of the following matrix $X$:
+
+$$X:= \begin{bmatrix} 
+1&1&1\cr -1&2&3\cr 0&1&0
+\end{bmatrix}$$
+which means that the polynomial is evaluated at the arguments:
+$$\begin{bmatrix} 
+1\cr 1\cr 1
+\end{bmatrix}\ ,\  \begin{bmatrix} 
+-1\cr 2\cr 3
+\end{bmatrix}\ ,\  \begin{bmatrix} 
+0\cr 1\cr 0
+\end{bmatrix}$$
+
+```python 
+X = [[1,1,1], [-1,2,3], [0,1,0]]
+pol.eval(X)
+
+>> array([3., 7., 2.])
+```
+
+## The `solve` method {#solve}
+
+The solve method is an instance method of the class `Pol`that enables to minimize, maximize or find a root of the polynomial instance calling it. 
+
+The call for the `solve` method takes the following form:
+
+```python
+
+solution, cpu = pol.solve(x0,...)   
+
+# see the list of arguments below
+# with their default values if any.
+```
+
+### Input arguments 
+The table below describes the input arguments of the `solve` method.
+
+:::{.tbl-caption}
+#### Input arguments of the `solve` method.
+| **Parameter**     | **Description**      | **Default**|
+|---|---------------|----:|
+| `x0` |  The initial guess for the solver. This is a vector of dimension `nx`. Notice that when several starting points are used (`Ntrials`>1 as explained below), the next initial guesses are randomly sampled in the admissible domain defined by `xmin` and `xmax`. | --|
+| `xmin`| The vector of lower bounds of the decision variables| -- |
+| `xmax`| The vector of lower bounds of the decision variables| -- |
+| `Ntrials`| The number of different starting points used in order to enhance the avoidance of local minima.| 1 |
+| `ngrid`| The number of grid points used in the scalar optimization-by-enumeration in the different direction of the components of the decision variable.| 1000| 
+|`iter_max`| Maximum number of rounds of scalar optimization[^1].| 100 |
+| `eps`| The precision that is used to stop the iterations. More precisely, the iterations stop when the last round of scalar optimization does not improve the cost function by more than $$\texttt{eps}\times\vert\texttt{J\_{previous}}\vert$$ where `J_previous` is the cost achieved at the previous round |$10^{-2}$ |
+| `psi`| The lambda function that applies to the cost function in order to define the modified quantity that is to be minimized. For instance the choice $$\texttt{psi= lambda v : -v}$$ leads to the \texttt{solver} method being oriented towards the maximization of the original cost. On the other hand, the choice $$\texttt{psi= lambda v : abs(v)}$$ leads to the `solver` method being oriented towards finding a root of the polynomial. The default setting is given by $$\texttt{psi = lambda v : v}$$ leading to `solve` trying to minimize the cost function[^2].| `lambda v:v`|
+
+Table: Input arguments for the `solve`method of the class `Pol`.
+:::
+
+### Output arguments 
+
+:::{.tbl-caption}
+#### Output arguments of the `solve`method.
+| **parameters** | **Description** |
+|---|----------------|
+| `solution`| A python `namedtuple` object containing the solution provided by the `solve` method. The dictionary show the following fields: <br> <br> - `x`: The best solution found <br> - `f`: the corresponding best value <br> <br> Therfore, the best solution and the best values can be obtained through `solution.x` and `solution.f`.|
+| `cpu` | The computation time needed to perform the compuations. |
+
+:::
+
+## Examples of use {#example}
+
+The following script gives an example of a call that asks for the maximization of the polynomial defined earlier (see @eq-examplePx) then prints the results so obtained:
+
+```python
+nx = 3
+x0 = np.zeros(nx)
+ntrials = 6
+ngrid = 1000
+xmin = -1*np.ones(nx)
+xmax = 2*np.ones(nx)
+
+solution, cpu = pol.solve(x0=x0, 
+                          xmin=xmin, 
+                          xmax=xmax, 
+                          ngrid=ngrid, 
+                          Ntrials=ntrials, 
+                          psi=lambda v:-v
+                          )
+                          
+print(f'xopt = {solution.x}')
+print(f'fopt = {solution.f}')
+print(f'computation time = {solution.cpu}')
+
+>> xopt = [-1.  2.  0.]
+>> fopt = 16.0
+>> computation time = 0.0046999454498291016
+```
+
+Changing the argument `psi`to `psi=lambda v:abs(v)` asks the solver to zero the polynomial and hence, leads to the following results:
+
+```python
+>> xopt = [-0.996997    0.58858859  0.63963964]
+>> fopt = -9.305087356087371e-05
+>> computation time = 0.003011941909790039
+```
+
+Finally, using the default definition leads to `solve` trying to find a minimum of the polynomial leading to:
+
+```python 
+>> xopt = [-1. -1.  2.]
+>> fopt = -6.0
+>> computation time = 0.005150318145751953
+```
+
+## Citing optipoly {#citing}
+
+
+```bibtex
+@misc{optipoly2024,
+      title={optipoly: A Python package for boxed-constrained multi-variable polynomial cost functions optimization}, 
+      author={Mazen Alamir},
+      year={2024},
+      eprint={5987757},
+      archivePrefix={arXiv},
+      primaryClass={eess.SY},
+      url={https://arxiv.org/submit/5987757}, 
+}
+```
+
+::: {.callout-tip}
+The above reference contains some comparison with alternative solver that underlines the performance of
+`optipoly` in terms of the achieved cost as well as in terms of the compuation time. 
+:::
+
+[^1]: This number is rarely used since the optimization is stopped before based on the `eps`-related termination condition
+[^2]: These are only three specific alternatives, any other definition of `psi`is possible provided that the expression admits a vectorized computation. 

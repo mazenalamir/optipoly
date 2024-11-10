@@ -1,0 +1,36 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "optipoly"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: index.qmd#problem
+        text: "Problem"
+      - href: index.qmd#declaration
+        text: "Declare"
+      - href: index.qmd#evaluation
+        text: "Evaluate"
+      - href: index.qmd#solve
+        text: "Solve"
+      - href: index.qmd#example
+        text: "Example"
+      - href: index.qmd#citing
+        text: "Cite optipoly"
+        
+
+# flatly, sketchy, pulse, sandstone, spacelab
+# superhero, united, yeti
+format:
+  html:
+    theme: flatly
+    css: styles.css
+    toc: true
+    toc-location: 'left'
+    self-contained: true
+
+
+
