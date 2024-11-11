@@ -53,7 +53,7 @@
     "href": "index.html#citing",
     "title": "OPTIPOLY",
     "section": "Citing optipoly",
-    "text": "Citing optipoly\n@misc{optipoly2024,\n      title={optipoly: A Python package for boxed-constrained multi-variable polynomial cost functions optimization}, \n      author={Mazen Alamir},\n      year={2024},\n      eprint={5987757},\n      archivePrefix={arXiv},\n      primaryClass={eess.SY},\n      url={https://arxiv.org/submit/5987757}, \n}\n\n\n\n\n\n\nTip\n\n\n\nThe above reference contains some comparison with alternative solver that underlines the performance of optipoly in terms of the achieved cost as well as in terms of the compuation time."
+    "text": "Citing optipoly\n@misc{optipoly2024,\n      title={optipoly: A Python package for boxed-constrained multi-variable polynomial cost functions optimization}, \n      author={Mazen Alamir},\n      year={2024},\n      eprint={5987757},\n      archivePrefix={arXiv},\n      primaryClass={eess.SY},\n      url={http://arxiv.org/abs/2411.05689}, \n}\n\n\n\n\n\n\nTip\n\n\n\nThe above reference contains some comparison with alternative solver that underlines the performance of optipoly in terms of the achieved cost as well as in terms of the compuation time."
   },
   {
     "objectID": "index.html#footnotes",

@@ -201,9 +201,10 @@ Finally, using the default definition leads to `solve` trying to find a minimum 
       eprint={5987757},
       archivePrefix={arXiv},
       primaryClass={eess.SY},
-      url={https://arxiv.org/submit/5987757}, 
+      url={http://arxiv.org/abs/2411.05689}, 
 }
 ```
+
 
 ::: {.callout-tip}
 The above reference contains some comparison with alternative solver that underlines the performance of
