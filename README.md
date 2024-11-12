@@ -14,8 +14,6 @@ of the solver.
 
 ## Installation
 
-The following pip-install will ne shortly available! 
-
 ``` default
 pip install optipoly
 ```
