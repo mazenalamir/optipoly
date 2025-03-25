@@ -208,7 +208,7 @@ Finally, using the default definition leads to `solve` trying to find a minimum 
 
 ::: {.callout-tip}
 The above reference contains some comparison with alternative solver that underlines the performance of
-`optipoly` in terms of the achieved cost as well as in terms of the compuation time. 
+`optipoly` in terms of the achieved cost as well as in terms of the compuation time. (Make sure that you examine the latest version of the paper)
 :::
 
 [^1]: This number is rarely used since the optimization is stopped before based on the `eps`-related termination condition
